@@ -100,7 +100,7 @@ inquirer
         // console.log("ID array in inq: " + ProductID + " QTY array in inq: " + ProductQTY )
         // console.log('selected id: '+inquirerResponse.itemID)
 
-        //response has to be parsed to a number before I can check validity...
+        //response has to be parsed to a number before I can check validity (next 2 variables are boolean)
 
         var validID = (ProductID.indexOf(parseInt(inquirerResponse.itemID)) != -1);
         //console.log('valid id? '+validID)
@@ -129,8 +129,12 @@ inquirer
 
 
 function receipt(itemID, itemQuantity){
+  
   console.log("\nYou have purchased " + itemQuantity);
   console.log("of: " + Products[itemID-1].name  +"\n");
+
+  //I could add a confirmation question here before finalizing
+
   var total = parseInt(Products[itemID-1].cost) * itemQuantity;
   leftInStock = Products[itemID-1].qty - itemQuantity;
 
