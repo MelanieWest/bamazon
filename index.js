@@ -1,6 +1,6 @@
-var mysql = require("mysql");
 var inquirer = require("inquirer");
 //var crud = require("./crud.js");
+var mysql = require("mysql");
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -62,14 +62,17 @@ function Purchase(){
       .prompt([
         {
           type: "list",
-          message: "Would you like to buy an item?",
-          choices:["yes","no"],
-          name:"stayOrGo"
+          message: "Are you ...",
+          choices:["...a customer?","...a manager?","...done?"],
+          name:"whatToDo"
         }
       ]).then(function(response){
-        if(response.stayOrGo === "yes"){
+        if(response.whatToDo === "...a customer?"){
           makePurchase();
         }
+        // else if(response.whatToDo === "...a manager?"){
+        //   crud.createProduct("Television","electronics",899,20)
+        // }
         else{
           connection.end();
         }
