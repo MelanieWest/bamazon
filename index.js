@@ -33,15 +33,26 @@ function readProducts() {
     if (err) throw err;
     // Log all results of the SELECT statement
     //console.log(res);
-    console.log(" product ID     product name           price             available");
-    console.log("--------------------------------------------------------------------");
+    console.log(" product ID       product name           price             available");
+    console.log("----------------------------------------------------------------------");
     res.forEach(function(item){
+
+    //numerical values need to be strings to determine length
+      var dispID = item.id.toString();
+
+      if(dispID.length<3){
+        for(n=dispID.length;n<3;n++){
+          dispID+=" ";
+        }
+      }
+
       if(item.item_name.length<20){
         for(j=item.item_name.length;j<20;j++){
           item.item_name+=" ";
         }
       }
 
+      //numerical values need to be strings to determine length
       var dispPrice = item.price.toString();
 
       if(dispPrice.length<10){
@@ -49,7 +60,7 @@ function readProducts() {
           dispPrice+=" ";
         }
       }
-      console.log("id: "+item.id+" |   name: "+item.item_name+" |  price: "+dispPrice+" |  qty: "+item.quantity);
+      console.log("id: "+dispID+" |   name: "+item.item_name+" |  price: "+dispPrice+" |  qty: "+item.quantity);
 
       Products.push({
         id: item.id,
@@ -65,13 +76,13 @@ function readProducts() {
 
     //console.log("ID array: " + ProductID + " QTY array: " + ProductQTY )
 
-    Purchase();
+    Options();
 
   }); 
 }
 
-//this function only determines if a purchase will be made.  If not, it ends the sql connection
-function Purchase(){
+//this function determines the course of action to take next
+function Options(){
   inquirer
       .prompt([
         {
@@ -155,17 +166,11 @@ function receipt(itemID, itemQuantity){
   var total = parseInt(Products[itemID-1].cost) * itemQuantity;
   leftInStock = Products[itemID-1].qty - itemQuantity;
 
-  if(leftInStock < 0){
-    itemQuantity = adjustQuantity(Products[itemID-1].qty);
-  }
-  else{
-    console.log("there are now "+ leftInStock +" left in stock.")
-    console.log("\nYou spent $" + total +" today on your " +itemQuantity +" " +Products[itemID-1].name +".\n");
-    return leftInStock;
-  }
+  //console.log("there are now "+ leftInStock +" left in stock.")
+  console.log("\nYou spent $" + total +" today on your " +itemQuantity +" " +Products[itemID-1].name +".\n");
+  return leftInStock;
 
 }
-
 
 
 function updateProduct(queryID,qtyRemaining) {
