@@ -46,16 +46,18 @@ function readProducts() {
     })
 
     //determine parameters of purchase
-    ProductID = Products.map(product=>product.id)
-    ProductQTY = Products.map(product=>product.qty)
+    Products.map(product=>ProductID.push(product.id))
+    Products.map(product=>ProductQTY.push(product.qty))
+
     console.log("ID array: " + ProductID + " QTY array: " + ProductQTY )
-    Purchase(ProductID,ProductQTY);
+
+    Purchase();
 
   }); 
 }
 
 //this function only determines if a purchase will be made.  If not, it ends the sql connection
-function Purchase(ID,QTY){
+function Purchase(){
   inquirer
       .prompt([
         {
@@ -66,7 +68,7 @@ function Purchase(ID,QTY){
         }
       ]).then(function(response){
         if(response.stayOrGo === "yes"){
-          makePurchase(ID,QTY);
+          makePurchase();
         }
         else{
           connection.end();
@@ -77,12 +79,12 @@ function Purchase(ID,QTY){
 //this function asks specifics about the purchase and provides a receipt before
 //updating the database
 
-function makePurchase(ID,QTY){
+function makePurchase(){
 inquirer
       .prompt([
         {
           type: "input",
-          message: "What is the ID of the item you would like to purchase?",
+          message: "What is the ID of the item you would like to purchase? (choose from list)",
           name: "itemID"
         },
         {
@@ -94,13 +96,18 @@ inquirer
       .then(function(inquirerResponse) {
         // we display the inquirerResponse from the answers
 
-        var validID = (ID.indexOf(inquirerResponse.itemID)!=-1);
-        var validQTY = (1< inquirerResponse.quantity && inquirerResponse.quantity < QTY[inquirerResponse.itemID-1])
+        //use simplified variables to handle invalid input data
+        // console.log("ID array in inq: " + ProductID + " QTY array in inq: " + ProductQTY )
+        // console.log('selected id: '+inquirerResponse.itemID)
 
-        if(!validID || !validQTY){
-          needMoreInfo();
-        }
-        else{
+        //response has to be parsed to a number before I can check validity...
+
+        var validID = (ProductID.indexOf(parseInt(inquirerResponse.itemID)) != -1);
+        //console.log('valid id? '+validID)
+        var validQTY = (1< inquirerResponse.quantity && inquirerResponse.quantity < ProductQTY[inquirerResponse.itemID-1])
+        //console.log('valid qty? '+validQTY)
+
+        if(validID  && validQTY){
 
           //simplify quantity and id in readable variables
           qty = parseInt(inquirerResponse.quantity);
@@ -111,56 +118,15 @@ inquirer
           //update qty in database to reflect corrected purchase
           updateProduct(id, leftInStock);
         }
+        else{
+          //recursively call this routine again
+          makePurchase();
+        }
 
       });
 }
 
 
-//call this function in response to incomplete input info
-
-function needMoreInfo(){
-  console.log("Please enter both a valid id and a quantity in range: ")
-  inquirer
-      .prompt([
-        {
-          type: "input",
-          message: "Please select the id of the item you would like to purchase",
-          name:"itemID" 
-        },
-        {
-          type: "input",
-          message: "Please select the quantity of the item you would like to purchase (between 1 and available qty)",
-          name:"quantity" 
-        }
-      ]).then(function(response){
-
-        //simplify id and quantity into readable variables
-        id = parseInt(response.itemID);
-        qty = parseInt(response.quantity);
-
-        leftInStock = receipt(id,qty);
-
-        //update qty in database to reflect corrected purchase
-        updateProduct(id, leftInStock);
-
-        // console.log("\nYou have purchased " + qty);
-        // console.log("of: " + Products[item-1].name  +"\n");
-        // var total = parseInt(Products[item-1].cost) * qty;
-        // leftInStock = Products[item-1].qty - qty;
-      
-        // if(leftInStock < 0){
-        //   var qty = adjustQuantity(Products[item-1].qty);
-        // }
-        // else{
-        //   console.log("there are now "+ leftInStock +" left in stock.")
-      
-        //   if(inquirerResponse.receipt === "Yes, please") {
-        //     console.log("\nYou spent $" + total +" today on your " +qty +" " +Products[item-1].name +".\n");
-        //   }
-        // }
-
-      })
-}
 
 function receipt(itemID, itemQuantity){
   console.log("\nYou have purchased " + itemQuantity);
@@ -179,30 +145,6 @@ function receipt(itemID, itemQuantity){
 
 }
 
-//call this function in case someone tries to buy more than we have in stock
-// ('available' is the amount in stock)
-
-function adjustQuantity(available){
-  inquirer
-      .prompt([
-        {
-          type: "input",
-          message: "there are only "+available+" items available. Please enter a new quantity (enter '0' if you changed your mind):",
-          name:"newQty" 
-        }
-      ]).then(function(response){
-        var adjusted = parseInt(response.newQty)
-        if( adjusted > 0 && adjusted <= available){
-            console.log('adjusted = '+ adjusted);
-            return adjusted;
-        }
-        else{
-          console.log("We are sorry we couldn't help you with this item.");
-          //allow them to select something different, or exit
-          Purchase();
-        }
-      })
-}
 
 
 function updateProduct(queryID,qtyRemaining) {
