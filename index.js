@@ -148,6 +148,7 @@ inquirer
         }
         else{
           //recursively call this routine again
+          console.log(" you entered an invalid value for the id or quantity ...")
           makePurchase();
         }
 
