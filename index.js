@@ -33,8 +33,8 @@ function readProducts() {
     if (err) throw err;
     // Log all results of the SELECT statement
     //console.log(res);
-    console.log(" product ID     product name           price         available");
-    console.log("----------------------------------------------------------------");
+    console.log(" product ID     product name           price             available");
+    console.log("--------------------------------------------------------------------");
     res.forEach(function(item){
       if(item.item_name.length<20){
         for(j=item.item_name.length;j<20;j++){
