@@ -1,0 +1,13 @@
+
+ Just so I don't forget how to run the test files:
+
+mysql --user=root --password=""<bamazon.sql
+mysql --user=root --password=""<bamazon-seeds.sql
+
+I removed these lines from my schema & seeds so I could use an imported authentication 
+package (node-express-passport):
+
+ DROP DATABASE IF EXISTS `bamazon_db`;
+CREATE DATABASE `bamazon_db`;
+
+
