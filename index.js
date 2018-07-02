@@ -107,7 +107,7 @@ inquirer
 
         var validID = (ProductID.indexOf(parseInt(inquirerResponse.itemID)) != -1);
         //console.log('valid id? '+validID)
-        var validQTY = (1< inquirerResponse.quantity && inquirerResponse.quantity < ProductQTY[inquirerResponse.itemID-1])
+        var validQTY = (0< inquirerResponse.quantity && inquirerResponse.quantity < ProductQTY[inquirerResponse.itemID-1])
         //console.log('valid qty? '+validQTY)
 
         if(validID  && validQTY){
