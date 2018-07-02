@@ -1,5 +1,4 @@
 var inquirer = require("inquirer");
-//var crud = require("./crud.js");
 var mysql = require("mysql");
 
 var connection = mysql.createConnection({
@@ -64,7 +63,7 @@ function readProducts() {
     Products.map(product=>ProductID.push(product.id))
     Products.map(product=>ProductQTY.push(product.qty))
 
-    console.log("ID array: " + ProductID + " QTY array: " + ProductQTY )
+    //console.log("ID array: " + ProductID + " QTY array: " + ProductQTY )
 
     Purchase();
 
@@ -85,9 +84,9 @@ function Purchase(){
         if(response.whatToDo === "...a customer?"){
           makePurchase();
         }
-        // else if(response.whatToDo === "...a manager?"){
-        //   crud.createProduct("Television","electronics",899,20)
-        // }
+        else if(response.whatToDo === "...a manager?"){
+          createProduct();
+        }
         else{
           connection.end();
         }
@@ -192,25 +191,49 @@ function updateProduct(queryID,qtyRemaining) {
 
 
  function createProduct() {
-  console.log("Inserting a new product...\n");
-  var query = connection.query(
-    "INSERT INTO inventory SET ?",
-    {
-      item_name: "Television",
-      department: "electronics",
-      price: 899,
-      quantity: 50
-    },
-    function(err, res) {
-      console.log(" product inserted!\n");
-      // Call readProducts AFTER the INSERT completes
-      readProducts();
-    }
-  );
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the item you would like to add?",
+        name: "item"
+      },
+      {
+        type: "input",
+        message: "What is the department for this product?",
+        name: "dept"
+      },
+      {
+        type: "input",
+        message: "What is the item cost?",
+        name: "price"
+      },
+      {
+        type: "input",
+        message: "How many of the item will be added to stock?",
+        name: "qty"
+      }
+  ]).then(function(response){
 
-  // logs the actual query being run
-  console.log(query.sql);
+      console.log("Inserting a new product...\n");
+      var query = connection.query(
+        "INSERT INTO inventory SET ?",
+        {
+          item_name: response.item,
+          department: response.dept,
+          price: response.price,
+          quantity: response.qty
+        },
+        function(err, res) {
+          console.log(" product inserted!\n");       
+          // logs the actual query being run
+          console.log(query.sql);
+        }
+      );
+      readProducts();
+  });
 }
+
 
 
 
