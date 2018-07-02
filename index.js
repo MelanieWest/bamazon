@@ -85,12 +85,6 @@ inquirer
           type: "input",
           message: "How many would you like?",
           name: "quantity"
-        },
-        {
-          type: "list",
-          message: "Would you like a receipt?",
-          choices: ["Yes, please", "No, thank you"],
-          name: "receipt"
         }
       ])
       .then(function(inquirerResponse) {
@@ -104,14 +98,17 @@ inquirer
           needMoreInfo();
         }
         else{
+
+          //simplify quantity and id in readable variables
           qty = parseInt(inquirerResponse.quantity);
           id  = parseInt(inquirerResponse.itemID)
+
+          receipt(id,qty);
+
+          //update qty in database to reflect corrected purchase
+          updateProduct(item, leftInStock);
         }
 
-        //send receipt to console:
-        receipt(id,qty);
-        //update qty in database to reflect corrected purchase
-        updateProduct(item, leftInStock);
       });
 }
 
@@ -133,27 +130,48 @@ function needMoreInfo(){
           name:"quantity" 
         }
       ]).then(function(response){
+
+        //simplify id and quantity into readable variables
         id = parseInt(response.itemID);
         qty = parseInt(response.quantity);
+
         receipt(id,qty);
+
+        //update qty in database to reflect corrected purchase
+        updateProduct(item, leftInStock);
+
+        // console.log("\nYou have purchased " + qty);
+        // console.log("of: " + Products[item-1].name  +"\n");
+        // var total = parseInt(Products[item-1].cost) * qty;
+        // leftInStock = Products[item-1].qty - qty;
+      
+        // if(leftInStock < 0){
+        //   var qty = adjustQuantity(Products[item-1].qty);
+        // }
+        // else{
+        //   console.log("there are now "+ leftInStock +" left in stock.")
+      
+        //   if(inquirerResponse.receipt === "Yes, please") {
+        //     console.log("\nYou spent $" + total +" today on your " +qty +" " +Products[item-1].name +".\n");
+        //   }
+        // }
+
       })
 }
 
 function receipt(itemID, itemQuantity){
-  console.log("\nYou have purchased " + qty);
-  console.log("of: " + Products[item-1].name  +"\n");
-  var total = parseInt(Products[item-1].cost) * qty;
-  leftInStock = Products[item-1].qty - qty;
+  console.log("\nYou have purchased " + itemQuantity);
+  console.log("of: " + Products[itemID-1].name  +"\n");
+  var total = parseInt(Products[itemID-1].cost) * itemQuantity;
+  leftInStock = Products[itemID-1].qty - itemQuantity;
 
   if(leftInStock < 0){
-    var qty = adjustQuantity(Products[item-1].qty);
+    itemQuantity = adjustQuantity(Products[itemID-1].qty);
   }
   else{
     console.log("there are now "+ leftInStock +" left in stock.")
-
-    if(inquirerResponse.receipt === "Yes, please") {
-      console.log("\nYou spent $" + total +" today on your " +qty +" " +Products[item-1].name +".\n");
-    }
+    console.log("\nYou spent $" + total +" today on your " +itemQuantity +" " +Products[itemID-1].name +".\n");
+    return leftInStock;
   }
 
 }
