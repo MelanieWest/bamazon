@@ -22,7 +22,9 @@ connection.connect(function(err) {
 });
 
 //set up data that is shared between functions
-var Products = []
+var Products = [];
+var ProductID = [];
+var ProductQTY = [];
 var item, qty, leftInStock;
 
 function readProducts() {
@@ -34,7 +36,7 @@ function readProducts() {
     //console.log(res);
 
     res.forEach(function(item){
-      console.log("id: "+item.id+", name: "+item.item_name+", price: "+item.price+", qty: "+item.quantity);
+      console.log("id: "+item.id+"   name: "+item.item_name+"   price: "+item.price+"   qty: "+item.quantity);
       Products.push({
         id: item.id,
         name: item.item_name,
@@ -44,14 +46,16 @@ function readProducts() {
     })
 
     //determine parameters of purchase
-
-    Purchase();
+    ProductID = Products.map(product=>product.id)
+    ProductQTY = Products.map(product=>product.qty)
+    console.log("ID array: " + ProductID + " QTY array: " + ProductQTY )
+    Purchase(ProductID,ProductQTY);
 
   }); 
 }
 
 //this function only determines if a purchase will be made.  If not, it ends the sql connection
-function Purchase(){
+function Purchase(ID,QTY){
   inquirer
       .prompt([
         {
@@ -62,7 +66,7 @@ function Purchase(){
         }
       ]).then(function(response){
         if(response.stayOrGo === "yes"){
-            makePurchase();
+          makePurchase(ID,QTY);
         }
         else{
           connection.end();
@@ -73,7 +77,7 @@ function Purchase(){
 //this function asks specifics about the purchase and provides a receipt before
 //updating the database
 
-function makePurchase(){
+function makePurchase(ID,QTY){
 inquirer
       .prompt([
         {
@@ -83,18 +87,17 @@ inquirer
         },
         {
           type: "input",
-          message: "How many would you like?",
+          message: "How many would you like? (between 1 & available qty)",
           name: "quantity"
         }
       ])
       .then(function(inquirerResponse) {
         // we display the inquirerResponse from the answers
 
-        //minimal error handling (defaults to first item and/or quantity one if answers are blank)
-        //ideally I would have some form of order confirmation first (log their answers and start over
-        //if they don't like what was entered)
+        var validID = (ID.indexOf(inquirerResponse.itemID)!=-1);
+        var validQTY = (1< inquirerResponse.quantity && inquirerResponse.quantity < QTY[inquirerResponse.itemID-1])
 
-        if(inquirerResponse.itemID===""||inquirerResponse.quantity ===""){
+        if(!validID || !validQTY){
           needMoreInfo();
         }
         else{
@@ -103,10 +106,10 @@ inquirer
           qty = parseInt(inquirerResponse.quantity);
           id  = parseInt(inquirerResponse.itemID)
 
-          receipt(id,qty);
+          leftInStock = receipt(id,qty);
 
           //update qty in database to reflect corrected purchase
-          updateProduct(item, leftInStock);
+          updateProduct(id, leftInStock);
         }
 
       });
@@ -116,7 +119,7 @@ inquirer
 //call this function in response to incomplete input info
 
 function needMoreInfo(){
-  console.log("Please enter both id and quantity: ")
+  console.log("Please enter both a valid id and a quantity in range: ")
   inquirer
       .prompt([
         {
@@ -126,7 +129,7 @@ function needMoreInfo(){
         },
         {
           type: "input",
-          message: "Please select the quantity of the item you would like to purchase",
+          message: "Please select the quantity of the item you would like to purchase (between 1 and available qty)",
           name:"quantity" 
         }
       ]).then(function(response){
@@ -135,10 +138,10 @@ function needMoreInfo(){
         id = parseInt(response.itemID);
         qty = parseInt(response.quantity);
 
-        receipt(id,qty);
+        leftInStock = receipt(id,qty);
 
         //update qty in database to reflect corrected purchase
-        updateProduct(item, leftInStock);
+        updateProduct(id, leftInStock);
 
         // console.log("\nYou have purchased " + qty);
         // console.log("of: " + Products[item-1].name  +"\n");
