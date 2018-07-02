@@ -34,9 +34,24 @@ function readProducts() {
     if (err) throw err;
     // Log all results of the SELECT statement
     //console.log(res);
-
+    console.log(" product ID     product name           price         available");
+    console.log("----------------------------------------------------------------");
     res.forEach(function(item){
-      console.log("id: "+item.id+"   name: "+item.item_name+"   price: "+item.price+"   qty: "+item.quantity);
+      if(item.item_name.length<20){
+        for(j=item.item_name.length;j<20;j++){
+          item.item_name+=" ";
+        }
+      }
+
+      var dispPrice = item.price.toString();
+
+      if(dispPrice.length<10){
+        for(k=dispPrice.length;k<10;k++){
+          dispPrice+=" ";
+        }
+      }
+      console.log("id: "+item.id+" |   name: "+item.item_name+" |  price: "+dispPrice+" |  qty: "+item.quantity);
+
       Products.push({
         id: item.id,
         name: item.item_name,
