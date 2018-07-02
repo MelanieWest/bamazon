@@ -96,7 +96,7 @@ function Options(){
           makePurchase();
         }
         else if(response.whatToDo === "...a manager?"){
-          createProduct();
+          manageStuff();
         }
         else{
           connection.end();
@@ -173,14 +173,14 @@ function receipt(itemID, itemQuantity){
 }
 
 
-function updateProduct(queryID,qtyRemaining) {
+function updateProduct(queryID,newQTY) {
 
   console.log("Updating product quantity...\n");
   var query = connection.query(
     "UPDATE inventory SET ? WHERE ?",
     [
       {
-        quantity: qtyRemaining
+        quantity: newQTY
       },
       {
         id: queryID
@@ -194,40 +194,92 @@ function updateProduct(queryID,qtyRemaining) {
     readProducts();      
  }
 
-
- function createProduct() {
+ function manageStuff(){
   inquirer
     .prompt([
       {
-        type: "input",
-        message: "What is the item you would like to add?",
-        name: "item"
-      },
-      {
-        type: "input",
-        message: "What is the department for this product?",
-        name: "dept"
-      },
-      {
-        type: "input",
-        message: "What is the item cost?",
-        name: "price"
-      },
-      {
-        type: "input",
-        message: "How many of the item will be added to stock?",
-        name: "qty"
+        type: "list",
+        message: "What would you like to do?",
+        choices:["Add a new product","Restock an existing product","Delete a product line"],
+        name: "manage"
       }
-  ]).then(function(response){
+    ]).then(function(response){
+      if(response.manage==="Add a new product"){
+        inquirer
+        .prompt([
+          {
+            type: "input",
+            message: "What is the item you would like to add?",
+            name: "item"
+          },
+          {
+            type: "input",
+            message: "What is the department for this product?",
+            name: "dept"
+          },
+          {
+            type: "input",
+            message: "What is the item cost?",
+            name: "price"
+          },
+          {
+            type: "input",
+            message: "How many of the item will be added to stock?",
+            name: "qty"
+          }
+        ]).then(function(response){
+          createProduct(response.item,response.dept,response.price,response.qty);
+        });
+      }
+      else if(response.manage==="Restock an existing product"){
+        inquirer
+          .prompt([
+            {
+              type:"input",
+              message: "Enter the product id: ",
+              name: "productID"
+            },
+            {
+              type:"input",
+              message: "How many are you adding to current stock?",
+              name: "qtyToAdd"
+            }
+          ]).then(function(response){
+            updatedQTY = Products[response.productID-1].qty + parseInt(response.qtyToAdd);
+            updateProduct(response.productID,updatedQTY);
+          })
+      }
+      else if(response.manage==="Delete a product line"){
+        inquirer
+          .prompt([
+            {
+              type:"input",
+              message: "Enter the ID of the product to delete:  ",
+              name: "productID"
+            },
+            {
+              type:"confirm",
+              message:"Are you sure? You are entering the Red Zone...",
+              name:"confirm"
+            }
+          ]).then(function(response){
+            deleteProduct(response.productID);
+          })
+      }
+    })
+}
+
+
+ function createProduct(item,dept,price,qty) {
 
       console.log("Inserting a new product...\n");
       var query = connection.query(
         "INSERT INTO inventory SET ?",
         {
-          item_name: response.item,
-          department: response.dept,
-          price: response.price,
-          quantity: response.qty
+          item_name: item,
+          department: dept,
+          price: price,
+          quantity: qty
         },
         function(err, res) {
           console.log(" product inserted!\n");       
@@ -236,8 +288,8 @@ function updateProduct(queryID,qtyRemaining) {
         }
       );
       readProducts();
-  });
-}
+  };
+
 
 
 
