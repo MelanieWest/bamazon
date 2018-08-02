@@ -194,7 +194,7 @@ function updateProduct(queryID,newQTY) {
     function(err, res) {
       console.log(" products updated!\n");
       // Call readProducts AFTER the UPDATE completes
-      //console.log(query.sql, res.message)
+      console.log(query.sql, res.message)
     });
     readProducts();      
  }
