@@ -64,7 +64,7 @@ function readProducts() {
     //   }
     //   console.log("id: "+dispID+" |   name: "+item.item_name+" |  price: "+dispPrice+" |  qty: "+item.quantity);
     res.forEach(function(item){
-      
+
       Products.push({
         id: item.id,
         name: item.item_name,
@@ -102,6 +102,7 @@ function Options(){
           manageStuff();
         }
         else{
+          console.log("Have a nice day!");
           connection.end();
         }
       })
