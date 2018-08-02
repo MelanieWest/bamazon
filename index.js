@@ -1,5 +1,6 @@
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+var cTable = require("console.table")
 
 var connection = mysql.createConnection({
   host: "localhost",
@@ -32,36 +33,38 @@ function readProducts() {
   connection.query("SELECT * FROM inventory", function(err, res) {
     if (err) throw err;
     // Log all results of the SELECT statement
-    //console.log(res);
-    console.log(" product ID       product name           price             available");
-    console.log("----------------------------------------------------------------------");
+    console.table(res);
+
+    // console.log(" product ID       product name           price             available");
+    // console.log("----------------------------------------------------------------------");
+    // res.forEach(function(item){
+
+    // //numerical values need to be strings to determine length
+    //   var dispID = item.id.toString();
+
+    //   if(dispID.length<3){
+    //     for(n=dispID.length;n<3;n++){
+    //       dispID+=" ";
+    //     }
+    //   }
+
+    //   if(item.item_name.length<20){
+    //     for(j=item.item_name.length;j<20;j++){
+    //       item.item_name+=" ";
+    //     }
+    //   }
+
+    //   //numerical values need to be strings to determine length
+    //   var dispPrice = item.price.toString();
+
+    //   if(dispPrice.length<10){
+    //     for(k=dispPrice.length;k<10;k++){
+    //       dispPrice+=" ";
+    //     }
+    //   }
+    //   console.log("id: "+dispID+" |   name: "+item.item_name+" |  price: "+dispPrice+" |  qty: "+item.quantity);
     res.forEach(function(item){
-
-    //numerical values need to be strings to determine length
-      var dispID = item.id.toString();
-
-      if(dispID.length<3){
-        for(n=dispID.length;n<3;n++){
-          dispID+=" ";
-        }
-      }
-
-      if(item.item_name.length<20){
-        for(j=item.item_name.length;j<20;j++){
-          item.item_name+=" ";
-        }
-      }
-
-      //numerical values need to be strings to determine length
-      var dispPrice = item.price.toString();
-
-      if(dispPrice.length<10){
-        for(k=dispPrice.length;k<10;k++){
-          dispPrice+=" ";
-        }
-      }
-      console.log("id: "+dispID+" |   name: "+item.item_name+" |  price: "+dispPrice+" |  qty: "+item.quantity);
-
+      
       Products.push({
         id: item.id,
         name: item.item_name,
